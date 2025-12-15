@@ -15,7 +15,7 @@ class AIColoringManager(
         val providerId = preferences.aiProvider().get()
         return when (providerId) {
             "nanobanana" -> NanoBananaProvider(Injekt.get(), preferences)
-            "chatgpt" -> ChatGPTProvider()
+            "openai" -> OpenAIProvider()
             "grok" -> GrokProvider()
             else -> null
         }

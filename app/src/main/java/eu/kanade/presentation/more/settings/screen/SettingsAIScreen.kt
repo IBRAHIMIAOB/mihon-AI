@@ -58,7 +58,7 @@ object SettingsAIScreen : SearchableSettings {
                     preference = aiPreferences.aiProvider(),
                     entries = persistentMapOf(
                         "nanobanana" to "NanoBanana (Gemini)",
-                        "chatgpt" to "ChatGPT",
+                        "openai" to "OpenAI",
                         "grok" to "Grok"
                     ),
                     title = stringResource(MR.strings.pref_ai_provider)
@@ -74,7 +74,7 @@ object SettingsAIScreen : SearchableSettings {
 
         val models = when (provider) {
             "nanobanana" -> NanoBananaProvider.SUPPORTED_MODELS.associateWith { it }
-            "chatgpt" -> mapOf("gpt-4o" to "GPT-4o", "gpt-4-turbo" to "GPT-4 Turbo")
+            "openai" -> mapOf("gpt-4o" to "GPT-4o", "gpt-4-turbo" to "GPT-4 Turbo")
             "grok" -> mapOf("grok-beta" to "Grok Beta")
             else -> emptyMap()
         }.toPersistentMap()
@@ -84,7 +84,7 @@ object SettingsAIScreen : SearchableSettings {
         return Preference.PreferenceGroup(
             title = when (provider) {
                 "nanobanana" -> "NanoBanana (Gemini) Settings"
-                "chatgpt" -> "ChatGPT Settings"
+                "openai" -> "OpenAI Settings"
                 "grok" -> "Grok Settings"
                 else -> "AI Provider Settings"
             },
