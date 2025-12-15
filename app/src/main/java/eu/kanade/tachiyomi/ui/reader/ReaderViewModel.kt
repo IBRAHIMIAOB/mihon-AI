@@ -73,9 +73,14 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
+import tachiyomi.domain.ai.service.AIColoringManager
 import tachiyomi.source.local.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import android.graphics.Bitmap
+import java.io.File
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
 import java.time.Instant
 import java.util.Date
 
@@ -101,6 +106,7 @@ class ReaderViewModel @JvmOverloads constructor(
     private val setMangaViewerFlags: SetMangaViewerFlags = Injekt.get(),
     private val getIncognitoState: GetIncognitoState = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
+    private val aiColoringManager: AIColoringManager = Injekt.get(),
 ) : ViewModel() {
 
     private val mutableState = MutableStateFlow(State())
@@ -894,6 +900,98 @@ class ReaderViewModel @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Opens the color canvas dialog for the selected page.
+     * User can draw color guidelines before sending to AI.
+     */
+    fun openColorCanvas() {
+        val page = (state.value.dialog as? Dialog.PageActions)?.page
+        if (page?.status != Page.State.Ready) return
+        
+        mutableState.update { it.copy(dialog = Dialog.ColorCanvas(page)) }
+    }
+
+    /**
+     * Colorizes the image using the annotated bitmap from the color canvas.
+     */
+    fun colorizeWithBitmap(annotatedBitmap: Bitmap) {
+        val canvasDialog = state.value.dialog as? Dialog.ColorCanvas
+        val page = canvasDialog?.page
+        if (page == null) return
+        val manga = manga ?: return
+
+        val context = Injekt.get<Application>()
+        val notifier = SaveImageNotifier(context)
+        notifier.onClear()
+
+        val filename = generateFilename(manga, page) + "_colorized"
+
+        // Pictures directory.
+        val relativePath = if (readerPreferences.folderPerManga().get()) {
+            DiskUtil.buildValidFilename(manga.title)
+        } else {
+            ""
+        }
+
+        // Show loading
+        mutableState.update { it.copy(dialog = Dialog.Loading) }
+
+        viewModelScope.launchNonCancellable {
+            try {
+                val provider = aiColoringManager.getProvider()
+                if (provider == null) {
+                    eventChannel.send(Event.ColorizedImage(ColorizeResult.NoProvider))
+                    mutableState.update { it.copy(dialog = null) }
+                    return@launchNonCancellable
+                }
+
+                // Create temp file from annotated bitmap
+                val tempFile = withIOContext {
+                    val file = File.createTempFile("colorize_", ".jpg", context.cacheDir)
+                    file.outputStream().use { output ->
+                        annotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 95, output)
+                    }
+                    file
+                }
+
+                // Colorize with timeout
+                val colorizedResult = withIOContext {
+                    withTimeout(120_000L) { // 2 minute timeout
+                        provider.colorize(tempFile)
+                    }
+                }
+
+                colorizedResult.onSuccess { coloredFile ->
+                    // Save colorized image
+                    val uri = imageSaver.save(
+                        image = Image.Page(
+                            inputStream = { coloredFile.inputStream() },
+                            name = filename,
+                            location = Location.Pictures.create(relativePath),
+                        ),
+                    )
+                    coloredFile.delete()
+                    withUIContext {
+                        notifier.onComplete(uri)
+                        eventChannel.send(Event.ColorizedImage(ColorizeResult.Success(uri)))
+                    }
+                }.onFailure { error ->
+                    tempFile.delete()
+                    logcat(LogPriority.ERROR, error) { "AI Colorization failed" }
+                    withUIContext {
+                        eventChannel.send(Event.ColorizedImage(ColorizeResult.Error(error)))
+                    }
+                }
+            } catch (e: Throwable) {
+                if (e is CancellationException && e !is TimeoutCancellationException) throw e
+                logcat(LogPriority.ERROR, e) { "AI Colorization failed" }
+                eventChannel.send(Event.ColorizedImage(ColorizeResult.Error(e)))
+            } finally {
+                mutableState.update { it.copy(dialog = null) }
+            }
+        }
+    }
+
     enum class SetAsCoverResult {
         Success,
         AddToLibraryFirst,
@@ -903,6 +1001,12 @@ class ReaderViewModel @JvmOverloads constructor(
     sealed interface SaveImageResult {
         class Success(val uri: Uri) : SaveImageResult
         class Error(val error: Throwable) : SaveImageResult
+    }
+
+    sealed interface ColorizeResult {
+        class Success(val uri: Uri) : ColorizeResult
+        class Error(val error: Throwable) : ColorizeResult
+        data object NoProvider : ColorizeResult
     }
 
     /**
@@ -973,6 +1077,7 @@ class ReaderViewModel @JvmOverloads constructor(
         data object ReadingModeSelect : Dialog
         data object OrientationModeSelect : Dialog
         data class PageActions(val page: ReaderPage) : Dialog
+        data class ColorCanvas(val page: ReaderPage) : Dialog
     }
 
     sealed interface Event {
@@ -984,5 +1089,6 @@ class ReaderViewModel @JvmOverloads constructor(
         data class SavedImage(val result: SaveImageResult) : Event
         data class ShareImage(val uri: Uri, val page: ReaderPage) : Event
         data class CopyImage(val uri: Uri) : Event
+        data class ColorizedImage(val result: ColorizeResult) : Event
     }
 }

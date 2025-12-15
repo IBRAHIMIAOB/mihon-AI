@@ -53,10 +53,12 @@ import eu.kanade.presentation.reader.DisplayRefreshHost
 import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
+import eu.kanade.presentation.reader.ColorCanvasDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
 import eu.kanade.presentation.reader.ReadingModeSelectDialog
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
+import androidx.compose.ui.graphics.asImageBitmap
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.coil.TachiyomiImageDecoder
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -241,6 +243,9 @@ class ReaderActivity : BaseActivity() {
                     is ReaderViewModel.Event.SetCoverResult -> {
                         onSetAsCoverResult(event.result)
                     }
+                    is ReaderViewModel.Event.ColorizedImage -> {
+                        onColorizeResult(event.result)
+                    }
                 }
             }
             .launchIn(lifecycleScope)
@@ -326,6 +331,22 @@ class ReaderActivity : BaseActivity() {
                     onSetAsCover = viewModel::setAsCover,
                     onShare = viewModel::shareImage,
                     onSave = viewModel::saveImage,
+                    onColorize = viewModel::openColorCanvas,
+                )
+            }
+            is ReaderViewModel.Dialog.ColorCanvas -> {
+                val page = state.dialog.page
+                val pageBitmap = remember(page) {
+                    page.stream?.invoke()?.use { stream ->
+                        android.graphics.BitmapFactory.decodeStream(stream)?.asImageBitmap()
+                    }
+                }
+                ColorCanvasDialog(
+                    pageImageBitmap = pageBitmap,
+                    onDismiss = onDismissRequest,
+                    onConfirm = { bitmap ->
+                        viewModel.colorizeWithBitmap(bitmap)
+                    },
                 )
             }
             null -> {}
@@ -763,6 +784,24 @@ class ReaderActivity : BaseActivity() {
                 Error -> MR.strings.notification_cover_update_failed
             },
         )
+    }
+
+    /**
+     * Called from the presenter when a page is colorized or fails.
+     */
+    private fun onColorizeResult(result: ReaderViewModel.ColorizeResult) {
+        when (result) {
+            is ReaderViewModel.ColorizeResult.Success -> {
+                toast(MR.strings.colorize_success)
+            }
+            is ReaderViewModel.ColorizeResult.Error -> {
+                toast(MR.strings.colorize_failed)
+                logcat(LogPriority.ERROR, result.error)
+            }
+            is ReaderViewModel.ColorizeResult.NoProvider -> {
+                toast(MR.strings.colorize_no_provider)
+            }
+        }
     }
 
     /**

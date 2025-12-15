@@ -153,6 +153,10 @@
     <string name="action_install">Install</string>
     <string name="action_share">Share</string>
     <string name="action_save">Save</string>
+    <string name="action_colorize">Colorize</string>
+    <string name="color_canvas_title">Draw color guidelines</string>
+    <string name="color_canvas_confirm">Colorize</string>
+    <string name="color_canvas_clear">Clear</string>
     <string name="action_reset">Reset</string>
     <string name="action_revert_to_default">Revert to default</string>
     <!-- missing undo feature after Compose rewrite #7454 -->
@@ -258,6 +262,10 @@
     <string name="pref_ai_prompt_summary">Prompt for the AI (e.g. \'vivid colors, anime style\')</string>
     <string name="pref_ai_style">Style</string>
     <string name="pref_ai_style_summary">Style preset (e.g. \'default\', \'cyberpunk\')</string>
+    <string name="colorizing_image">Colorizing image…</string>
+    <string name="colorize_success">Image colorized and saved</string>
+    <string name="colorize_failed">Failed to colorize image</string>
+    <string name="colorize_no_provider">AI coloring is not enabled</string>
 
     <string name="pref_manage_notifications">Manage notifications</string>
     <string name="pref_app_language">App language</string>
