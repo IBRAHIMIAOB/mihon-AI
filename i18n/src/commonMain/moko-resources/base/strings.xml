@@ -266,6 +266,13 @@
     <string name="colorize_success">Image colorized and saved</string>
     <string name="colorize_failed">Failed to colorize image</string>
     <string name="colorize_no_provider">AI coloring is not enabled</string>
+    
+    <string name="pref_ai_model">Model</string>
+    <string name="pref_ai_text_action">Text Action</string>
+    <string name="pref_ai_target_language">Target Language</string>
+    <string name="pref_ai_target_language_summary">Language to translate to</string>
+    <string name="pref_ai_additional_instructions">Additional Instructions (Optional)</string>
+    <string name="pref_ai_additional_instructions_summary">Append extra instructions to the prompt</string>
 
     <string name="pref_manage_notifications">Manage notifications</string>
     <string name="pref_app_language">App language</string>

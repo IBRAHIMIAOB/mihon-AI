@@ -26,18 +26,7 @@ object SettingsAIScreen : SearchableSettings {
     override fun getPreferences(): List<Preference> {
         val aiPreferences = remember { Injekt.get<AIPreferences>() }
         
-        // For now hardcoding strings as I can't easily add to strings.xml without finding it
-        // and usually these apps use Multi-Language framework.
-        // I will use placeholder strings where MR is expected, or raw strings if possible.
-        // But getTitleRes expects StringResource (Int). 
-        // I will reuse a generic string or one from the system if I can't add one.
-        // However, standard string adding in Android requires modifying values/strings.xml.
-        // I will assume I can't add resources easily and use existing ones for Title if possible,
-        // or just add a dummy MR identifier if I can modify the MR generation or if it's dynamic.
-        // Tachiyomi uses Moko Resources (MR).
-        // I will try to use a dummy `MR.strings.app_name` for Title temporarily if I can't add new one,
-        // or actually I should add to `i18n` strings.
-        
+
         return listOf(
             getGeneralGroup(aiPreferences),
             getProviderGroup(aiPreferences)
@@ -92,12 +81,12 @@ object SettingsAIScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     preference = aiPreferences.aiModel(),
                     entries = models,
-                    title = "Model",
+                    title = stringResource(MR.strings.pref_ai_model),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = aiPreferences.aiStyle(),
                     entries = styles,
-                    title = "Style",
+                    title = stringResource(MR.strings.pref_ai_style),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = aiPreferences.aiTextAction(),
@@ -108,15 +97,15 @@ object SettingsAIScreen : SearchableSettings {
                         "remove_bubbles" to "Remove Bubbles",
                         "whiten" to "Whiten Bubbles"
                     ),
-                    title = "Text Action",
+                    title = stringResource(MR.strings.pref_ai_text_action),
                 ),
             ).mutate {
                 if (textAction == "translate") {
                     add(
                         Preference.PreferenceItem.EditTextPreference(
                             preference = aiPreferences.aiTargetLanguage(),
-                            title = "Target Language",
-                            subtitle = "Language to translate to",
+                            title = stringResource(MR.strings.pref_ai_target_language),
+                            subtitle = stringResource(MR.strings.pref_ai_target_language_summary),
                         )
                     )
                 }
@@ -130,8 +119,8 @@ object SettingsAIScreen : SearchableSettings {
                 add(
                     Preference.PreferenceItem.EditTextPreference(
                         preference = aiPreferences.aiPrompt(),
-                        title = "Additional Instructions (Optional)",
-                        subtitle = "Append extra instructions to the prompt"
+                        title = stringResource(MR.strings.pref_ai_additional_instructions),
+                        subtitle = stringResource(MR.strings.pref_ai_additional_instructions_summary)
                     )
                 )
             }
