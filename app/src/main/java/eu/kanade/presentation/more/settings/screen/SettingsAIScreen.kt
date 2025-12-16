@@ -14,7 +14,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import tachiyomi.domain.ai.service.NanoBananaProvider
+import tachiyomi.domain.ai.service.GoogleProvider
 
 object SettingsAIScreen : SearchableSettings {
 
@@ -46,7 +46,7 @@ object SettingsAIScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     preference = aiPreferences.aiProvider(),
                     entries = persistentMapOf(
-                        "nanobanana" to "NanoBanana (Gemini)",
+                        "google" to "Google (Gemini)",
                         "openai" to "OpenAI",
                         "grok" to "Grok"
                     ),
@@ -62,17 +62,17 @@ object SettingsAIScreen : SearchableSettings {
         val textAction by aiPreferences.aiTextAction().collectAsState()
 
         val models = when (provider) {
-            "nanobanana" -> NanoBananaProvider.SUPPORTED_MODELS.associateWith { it }
+            "google", "nanobanana" -> GoogleProvider.SUPPORTED_MODELS.associateWith { it }
             "openai" -> mapOf("gpt-4o" to "GPT-4o", "gpt-4-turbo" to "GPT-4 Turbo")
             "grok" -> mapOf("grok-beta" to "Grok Beta")
             else -> emptyMap()
         }.toPersistentMap()
 
-        val styles = NanoBananaProvider.STYLES.keys.associateWith { it }.toPersistentMap()
+        val styles = AIPromptBuilder.STYLES.keys.associateWith { it }.toPersistentMap()
 
         return Preference.PreferenceGroup(
             title = when (provider) {
-                "nanobanana" -> "NanoBanana (Gemini) Settings"
+                "google", "nanobanana" -> "Google (Gemini) Settings"
                 "openai" -> "OpenAI Settings"
                 "grok" -> "Grok Settings"
                 else -> "AI Provider Settings"
