@@ -279,7 +279,8 @@ class ReaderActivity : BaseActivity() {
         }
 
         val onDismissRequest = viewModel::closeDialog
-        when (state.dialog) {
+        val dialog = state.dialog
+        when (dialog) {
             is ReaderViewModel.Dialog.Loading -> {
                 AlertDialog(
                     onDismissRequest = {},
@@ -335,7 +336,7 @@ class ReaderActivity : BaseActivity() {
                 )
             }
             is ReaderViewModel.Dialog.ColorCanvas -> {
-                val page = state.dialog.page
+                val page = dialog.page
                 val pageBitmap = remember(page) {
                     page.stream?.invoke()?.use { stream ->
                         android.graphics.BitmapFactory.decodeStream(stream)?.asImageBitmap()

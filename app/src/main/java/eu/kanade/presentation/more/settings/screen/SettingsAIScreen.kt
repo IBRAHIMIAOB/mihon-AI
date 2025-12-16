@@ -2,19 +2,21 @@ package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.collectAsState
+import tachiyomi.presentation.core.util.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import eu.kanade.presentation.more.settings.Preference
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentMap
+import kotlinx.collections.immutable.PersistentList
 import tachiyomi.domain.ai.service.AIPreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import tachiyomi.domain.ai.service.GoogleProvider
+import tachiyomi.domain.ai.service.AIPromptBuilder
 
 object SettingsAIScreen : SearchableSettings {
 
@@ -25,7 +27,7 @@ object SettingsAIScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val aiPreferences = remember { Injekt.get<AIPreferences>() }
-        
+
 
         return listOf(
             getGeneralGroup(aiPreferences),
@@ -70,14 +72,7 @@ object SettingsAIScreen : SearchableSettings {
 
         val styles = AIPromptBuilder.STYLES.keys.associateWith { it }.toPersistentMap()
 
-        return Preference.PreferenceGroup(
-            title = when (provider) {
-                "google", "nanobanana" -> "Google (Gemini) Settings"
-                "openai" -> "OpenAI Settings"
-                "grok" -> "Grok Settings"
-                else -> "AI Provider Settings"
-            },
-            preferenceItems = persistentListOf(
+        val baseItems: PersistentList<Preference.PreferenceItem<out Any, out Any>> = persistentListOf(
                 Preference.PreferenceItem.ListPreference(
                     preference = aiPreferences.aiModel(),
                     entries = models,
@@ -99,31 +94,42 @@ object SettingsAIScreen : SearchableSettings {
                     ),
                     title = stringResource(MR.strings.pref_ai_text_action),
                 ),
-            ).mutate {
-                if (textAction == "translate") {
-                    add(
-                        Preference.PreferenceItem.EditTextPreference(
-                            preference = aiPreferences.aiTargetLanguage(),
-                            title = stringResource(MR.strings.pref_ai_target_language),
-                            subtitle = stringResource(MR.strings.pref_ai_target_language_summary),
-                        )
-                    )
-                }
-                add(
-                    Preference.PreferenceItem.EditTextPreference(
-                        preference = aiPreferences.aiApiKey(),
-                        title = stringResource(MR.strings.pref_ai_api_key),
-                        subtitle = stringResource(MR.strings.pref_ai_api_key_summary)
-                    )
+            )
+
+        val items = baseItems.builder()
+
+        if (textAction == "translate") {
+            items.add(
+                Preference.PreferenceItem.EditTextPreference(
+                    preference = aiPreferences.aiTargetLanguage(),
+                    title = stringResource(MR.strings.pref_ai_target_language),
+                    subtitle = stringResource(MR.strings.pref_ai_target_language_summary),
                 )
-                add(
-                    Preference.PreferenceItem.EditTextPreference(
-                        preference = aiPreferences.aiPrompt(),
-                        title = stringResource(MR.strings.pref_ai_additional_instructions),
-                        subtitle = stringResource(MR.strings.pref_ai_additional_instructions_summary)
-                    )
-                )
-            }
+            )
+        }
+        items.add(
+            Preference.PreferenceItem.EditTextPreference(
+                preference = aiPreferences.aiApiKey(),
+                title = stringResource(MR.strings.pref_ai_api_key),
+                subtitle = stringResource(MR.strings.pref_ai_api_key_summary)
+            )
+        )
+        items.add(
+            Preference.PreferenceItem.EditTextPreference(
+                preference = aiPreferences.aiPrompt(),
+                title = stringResource(MR.strings.pref_ai_additional_instructions),
+                subtitle = stringResource(MR.strings.pref_ai_additional_instructions_summary)
+            )
+        )
+
+        return Preference.PreferenceGroup(
+            title = when (provider) {
+                "google", "nanobanana" -> "Google (Gemini) Settings"
+                "openai" -> "OpenAI Settings"
+                "grok" -> "Grok Settings"
+                else -> "AI Provider Settings"
+            },
+            preferenceItems = items.build()
         )
     }
 }

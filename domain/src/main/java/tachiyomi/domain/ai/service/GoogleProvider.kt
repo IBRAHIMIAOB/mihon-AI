@@ -4,7 +4,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import tachiyomi.core.common.util.system.logcat
 import java.io.File
 import java.io.IOException
@@ -79,7 +79,7 @@ class GoogleProvider(
                 .url(url)
                 .addHeader("x-goog-api-key", apiKey)
                 .addHeader("Content-Type", "application/json")
-                .post(jsonBody.asRequestBody("application/json".toMediaType()))
+                .post(jsonBody.toRequestBody("application/json".toMediaType()))
                 .build()
 
             val response = client.newCall(request).execute()
