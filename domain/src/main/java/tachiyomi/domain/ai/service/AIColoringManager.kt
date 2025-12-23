@@ -35,7 +35,7 @@ class AIColoringManager(
         return preferences.aiColoringEnabled().get()
     }
 
-    fun colorize(image: File): Result<File> {
+    suspend fun colorize(image: File, customPrompt: String? = null): Result<File> {
         val apiKey = preferences.aiApiKey().get()
         if (apiKey.isBlank()) {
             return Result.failure(Exception("API Key is missing"))
@@ -56,7 +56,7 @@ class AIColoringManager(
             val imageUrl = "data:$mimeType;base64,$base64Image"
             val modelName = preferences.aiModel().get()
             
-            val userPrompt = preferences.aiPrompt().get()
+            val userPrompt = customPrompt ?: preferences.aiPrompt().get()
             val textAction = preferences.aiTextAction().get()
             val targetLanguage = preferences.aiTargetLanguage().get()
             val styleName = preferences.aiStyle().get()

@@ -950,8 +950,16 @@ class ReaderViewModel @JvmOverloads constructor(
 
                 // Colorize with timeout
                 val colorizedResult = withIOContext {
-                    withTimeout(120_000L) { // 2 minute timeout
-                        aiColoringManager.colorize(tempFile)
+                     withTimeout(120_000L) { // 2 minute timeout
+                        val guidedPrompt = """
+                            The input image contains rough color strokes added by the user as color hints.
+                            Refine these colors and apply them to the underlying manga art.
+                            Use the colors from the strokes for the corresponding areas (e.g. hair, clothes).
+                            Keep the original black line art intact and visible. 
+                            Blend the colors naturally into a high-quality colored manga page.
+                        """.trimIndent()
+                        
+                        aiColoringManager.colorize(tempFile, customPrompt = guidedPrompt)
                     }
                 }
 
