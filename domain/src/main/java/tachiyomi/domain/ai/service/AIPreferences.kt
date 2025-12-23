@@ -19,5 +19,5 @@ class AIPreferences(
 
     fun aiTargetLanguage() = preferenceStore.getString("ai_target_language", "English")
 
-    fun aiStyle() = preferenceStore.getString("ai_style", "High-Contrast Cel Shading")
+    fun aiStyle() = preferenceStore.getString("ai_style", "Natural")
 }

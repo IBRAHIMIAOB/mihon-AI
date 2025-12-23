@@ -55,8 +55,18 @@ class AIColoringManager(
             }
             val imageUrl = "data:$mimeType;base64,$base64Image"
             val modelName = preferences.aiModel().get()
-            val prompt = preferences.aiPrompt().get().takeIf { it.isNotBlank() } 
-                ?: "Using the input image provided, regenerate the scene in an oil painting style, using a warm autumn palette (oranges and reds)."
+            
+            val userPrompt = preferences.aiPrompt().get()
+            val textAction = preferences.aiTextAction().get()
+            val targetLanguage = preferences.aiTargetLanguage().get()
+            val styleName = preferences.aiStyle().get()
+
+            val prompt = AIPromptBuilder.buildPrompt(
+                textAction = textAction,
+                targetLanguage = targetLanguage,
+                styleName = styleName,
+                userPrompt = userPrompt
+            )
 
             val payload = buildJsonObject {
                 put("model", modelName)
@@ -78,13 +88,6 @@ class AIColoringManager(
                     })
                 }
             }
-            // Note: "modalities" might strictly be needed if using specific models, but often inferred. 
-            // The python script used "modalities": ["image", "text"], adding it might be safer for some models strictly following it.
-            // However, typical chat completions endpoint structure is standard. 
-            // I'll stick to standard structure unless explicit requirement for 'modalities' param exists for this specific endpoint variant 
-            // but the user script had it. Let's add it if possible, but standard chat completion usually doesn't need it at root for all providers.
-            // OpenRouter might pass it through. Let's start standard. Wait, user script HAD it.
-            // "modalities": ["image", "text"]
 
             val jsonPayload = buildJsonObject {
                  put("model", modelName)
