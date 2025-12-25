@@ -81,7 +81,6 @@ fun ReaderPageActionsDialog(
                     icon = Icons.Outlined.ColorLens,
                     onClick = {
                         onAiEnhance()
-                        onDismissRequest()
                     },
                 )
             }
