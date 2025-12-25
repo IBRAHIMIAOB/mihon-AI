@@ -29,43 +29,57 @@ This is a customized fork of [Mihon](https://github.com/mihonapp/mihon) that add
 
 </div>
 
-## AI Coloring & Features
+## Mihon AI Coloring
 
-This fork enables AI-powered coloring of manga chapters and other enhancements.
+This specialized fork of Mihon is dedicated to integrating AI-powered features, primarily focusing on **AI Coloring** for manga panels.
 
-### Changed Files
-The core changes for these features can be found in:
-- `domain/src/main/java/tachiyomi/domain/ai/service`
-- `app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsAIScreen.kt`
-- `app/src/main/java/eu/kanade/presentation/reader/ColorCanvasDialog.kt`
-- and more...
+**Our Goal:** We encourage the community to test, develop, and refine these features so they can eventually be merged into the main [Mihon app](https://github.com/mihonapp/mihon).
 
-### How to Use (Manual Testing Guide)
+### Recommended Models
+
+To get the best results, we recommend using the following Gemini models via OpenRouter. Prices are approximate:
+
+| Model ID | Description | Price (approx.) |
+| :--- | :--- | :--- |
+| `google/gemini-2.5-flash-image-preview`<br>`google/gemini-2.5-flash-image` | **Cheap & Fast**<br>Good for bulk coloring. | ~$0.03 / image |
+| `google/gemini-3-pro-image-preview` | **High Quality**<br>Expensive but provides better detail and coloring. | $0.1 - $1.3 / image |
+
+> [!NOTE]
+> For more models and details, visit [OpenRouter Models](https://openrouter.ai/models?fmt=cards&input_modalities=image%2Ctext&output_modalities=image).
+
+### How to Use
 
 To use the AI coloring features, follow these steps:
 
 1.  **Get an API Key**: Obtain an API key from [OpenRouter](https://openrouter.ai/settings/keys).
 2.  **Add Credits**: Ensure you have added credits to your OpenRouter account.
-3.  **Choose a Model**: Select a supported model. See the list of models here: [OpenRouter Models](https://openrouter.ai/models?fmt=cards&input_modalities=image%2Ctext&output_modalities=image).
-4.  **Configure in App**:
+3.  **Configure in App**:
     - Go to **Settings > AI Coloring**.
     - Enter your **API Key**.
     - Enable **AI Coloring**.
-    - Enter the **Model ID** (e.g., `google/gemini-2.0-flash-exp`).
-    - Select your **Style** and **Translation** options (Note: Translation may not work effectively with weaker models).
-5.  **Download & Color**:
-    - Download a chapter.
-    - The coloring process will occur automatically during the download.
+    - Enter a **Model ID** from the list above.
+4.  **Coloring Methods**:
 
-### Future Features
-- **AI Coloring Guidance**: Allow users to draw/scribble guides so the AI colors based on user preferences.
-- **Reference Style**: Capability for users to provide a reference image for the AI to copy the coloring style.
-- **Motion Images**: Convert manga panels into GIF motion images using OpenRouter's image-to-video capabilities.
+    **Method A: Automatic Chapter Coloring (Bulk)**
+    - Download a chapter with **AI Coloring** enabled in settings.
+    - The entire chapter will be colored during the download process.
+    - *Note: This applies coloring to all pages automatically without individual guidelines.*
+
+    **Method B: Individual Panel Coloring (Guided)**
+    - Long-press a panel or open the menu while reading.
+    - Select **AI Coloring** for the specific panel.
+    - You can provide **guidelines** (scribbles/lines) to direct the AI on how to color specific areas (e.g., hair color, clothes).
+    - This allows for higher consistency and control.
 
 ### Known Issues
-- **Weak Image Gen Models**: Issues are often related to using weak image generation models. It is recommended to use high-quality models (e.g., successors to Nanobabab).
-- **User Coloring UI**: The manual coloring interface (`ColorCanvasDialog.kt`) is implemented simply and may not fully reflect in the UI immediately.
-- **Storage/Caching**: Currently, coloring happens upon download. A better method is needed to color images per panel on-demand and save them in cache/storage more efficiently.
+- **Bulk Downloading**: Downloading a whole chapter with AI enabled may not be the best approach for everyone due to cost and varying quality.
+- **Image Quality**: Quality can degrade with cheaper/weaker image generation models.
+- **Consistency**: Colors may not be consistent from one panel to another (e.g., character hair changing color).
+
+### Features & Roadmap
+- **Motion Panels**: We are exploring Image-to-Video to create moving panels. *Currently limited by OpenRouter support.*
+- **Color Consistency**: Future updates aim to include a "Color Log" or "Character Profile" system. This would categorize characters (e.g., `Character_Name_SkinColor = White`) to maintain consistent coloring across pages.
+- **Contribution**: We welcome all contributions to improve these features!
 
 ---
 
