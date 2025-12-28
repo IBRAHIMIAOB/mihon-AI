@@ -114,7 +114,6 @@ fun ColorGuidelinesDialog(
                     .fillMaxSize()
                     .padding(16.dp),
             ) {
-                logcat { "TEMP_LOG: ColorGuidelinesDialog Composed" }
                 // Top bar with title and close button
                 Row(
                     modifier = Modifier.fillMaxWidth(),

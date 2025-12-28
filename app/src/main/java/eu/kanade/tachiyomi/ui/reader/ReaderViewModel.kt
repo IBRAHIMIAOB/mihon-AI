@@ -908,7 +908,6 @@ class ReaderViewModel @JvmOverloads constructor(
         val page = (state.value.dialog as? Dialog.PageActions)?.page
         if (page?.status != Page.State.Ready) return
         
-        logcat { "TEMP_LOG: Opening ColorGuidelinesDialog for page ${page.number}" }
         mutableState.update { it.copy(dialog = Dialog.AiGuidelines(page)) }
     }
 

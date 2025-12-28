@@ -380,7 +380,6 @@ class Downloader(
                         page.status = Page.State.LoadPage
                         try {
                             page.imageUrl = download.source.getImageUrl(page)
-                            logcat { "TEMP_LOG: Fetched image URL for page ${page.number}: ${page.imageUrl}" }
                         } catch (e: Throwable) {
                             page.status = Page.State.Error(e)
                         }
@@ -424,7 +423,6 @@ class Downloader(
         } catch (error: Throwable) {
             if (error is CancellationException) throw error
             // If the page list threw, it will resume here
-            logcat(LogPriority.ERROR, error) { "TEMP_LOG: Error downloading chapter ${download.chapter.name}" }
             download.status = Download.State.ERROR
             notifier.onError(error.message, download.chapter.name, download.manga.title, download.manga.id)
         }
@@ -492,7 +490,6 @@ class Downloader(
         page.status = Page.State.DownloadImage
         page.progress = 0
         return flow {
-            logcat { "TEMP_LOG: Downloading image for page ${page.number} from ${page.imageUrl}" }
             val response = download.source.getImage(page)
             val file = tmpDir.createFile("$filename.tmp")!!
             try {
@@ -557,7 +554,6 @@ class Downloader(
                 }
 
                 file.renameTo("$filename.$extension")
-                logcat { "TEMP_LOG: Saved image as $filename.$extension" }
 
 
 
